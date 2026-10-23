@@ -1,6 +1,5 @@
 import express from "express"
 import pool from "./data/db.js";
-import e from "express";
 
 const app = express();
 
@@ -69,14 +68,32 @@ app.get("/albumok",async(req,res)=>{
     const { mufaj,tol,ig} = req.query;
 
     try {
-        if(!mufaj || !tol || !ig){
-            return res.status(400).json({error :'Hiányzó lekérdezési paraméterek!'});
-        }
-        if(isNaN(tol)){
-            res.send("Csak szám lehet")
+        if (tol && isNaN(tol)) {
+            return res.status(400).send("Csak szám lehet");
         }
 
-        let sql = "SELECT * FROM albumok WHERE mufaj = ? ev BETWEEN tol AND ig"
+        if (ig && isNaN(ig)) {
+            return res.status(400).send("Csak szám lehet");
+        }
+
+        let sql = "SELECT * FROM albumok WHERE 1=1 "
+        let adatok = [];
+
+        if (mufaj) {
+            sql += " AND mufaj = ?";
+            adatok.push(mufaj);
+        }
+
+        if (tol) {
+            sql += " AND ev >= ?";
+            adatok.push(tol);
+        }
+
+        if (ig) {
+            sql += " AND ev <= ?";
+            adatok.push(ig);
+        }
+
         let [eredmeny] = await pool.query(sql,[mufaj,tol,ig])
 
         return res.json(eredmeny)
@@ -90,12 +107,13 @@ app.get("/albumok/kereses",async (req,res)=>{
 
     try {
 
-        if(q.lenght<2){
-            res.send("Legalább 2 karakter kell").status(400)
+        if(!q || q.lenght<2){
+            return res.send("Legalább 2 karakter kell").status(400)
         }
 
-        let sql = "SELECT * FROM albumok WHERE cim = ?"
-        let [eredmeny] = await pool.query(sql,[q.toLowerCase()])
+        
+        let sql = "SELECT * FROM albumok JOIN eloadok ON eloado_id = eloadok.id WHERE cim LIKE ? OR nev LIKE ?"
+        let [eredmeny] = await pool.query(sql,[`%${q}%`, `%${q}%`])
         return res.json(eredmeny)
 
     } catch (error) {

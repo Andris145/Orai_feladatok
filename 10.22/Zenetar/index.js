@@ -75,26 +75,9 @@ app.get("/albumok",async(req,res)=>{
         if (ig && isNaN(ig)) {
             return res.status(400).send("Csak szám lehet");
         }
-
-        let sql = "SELECT * FROM albumok WHERE 1=1 "
-        let adatok = [];
-
-        if (mufaj) {
-            sql += " AND mufaj = ?";
-            adatok.push(mufaj);
-        }
-
-        if (tol) {
-            sql += " AND ev >= ?";
-            adatok.push(tol);
-        }
-
-        if (ig) {
-            sql += " AND ev <= ?";
-            adatok.push(ig);
-        }
-
-        let [eredmeny] = await pool.query(sql,[mufaj,tol,ig])
+        
+        let sql = "SELECT * FROM albumok WHERE mufaj = ? AND ev >= ? AND ev <= ?";
+        let [eredmeny] = await pool.query(sql, [mufaj, tol, ig]);
 
         return res.json(eredmeny)
     } catch (error) {

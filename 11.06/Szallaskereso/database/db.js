@@ -4,8 +4,8 @@ const dbconfig={
     host:"localhost",
     database:"szallasok",
     user:"root",
-    password:"",
-    port:3307
+    password:"123",
+    port:3306
 };
 
 const pool = mysql.createPool(dbconfig);

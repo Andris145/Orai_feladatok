@@ -4,26 +4,30 @@ import pool from "./data/db.js";
 const app = express();
 
 app.get("/eloadok", async (req, res)=>{
+    const orsz = req.query.orszag
+
+    if (orsz!=null){
+        try {
+
+            let sql = "SELECT nev, orszag FROM eloadok WHERE orszag = ?"
+            let [eredmeny] = await pool.query(sql,[orsz])
+        
+            return res.json(eredmeny)
+
+        } 
+        catch (error) {
+            console.log(error)
+        }
+
+    }
+
     let sql = "SELECT nev FROM eloadok ORDER BY nev ASC"
     let [eredmeny] = await pool.query(sql)
 
     res.json(eredmeny)
 })
 
-app.get("/eloadok", async (req,res)=>{
-    const orsz = req.query.orszag
-    try {
 
-        let sql = "SELECT nev, orszag FROM eloadok WHERE orszag = ?"
-        let [eredmeny] = await pool.query(sql,[orsz])
-    
-        return res.json(eredmeny)
-
-    } catch (error) {
-        console.log(error)
-    }
-
-})
 
 app.get("/eloadok/:id", async (req,res)=>{
     let id = req.params.id;
@@ -86,7 +90,7 @@ app.get("/albumok",async(req,res)=>{
 })
 
 app.get("/albumok/kereses",async (req,res)=>{
-    const { q }= req.query;
+    const { q } = req.query;
 
     try {
 
